@@ -259,9 +259,17 @@ class Instance(Model):
         ):
             status = result.status
             statistics.update(result.statistics)
+            if 'time' not in statistics:
+                intermediate_time = timedelta(
+                    milliseconds = (int(pow(2, 32)) if self.timed_out else 0))
+            elif 'time' in statistics:
+                time_: Union[int, timedelta] = statistics['time'] 
+                intermediate_time = timedelta(milliseconds=time_) if isinstance(time_, int) else time_
             if result.solution is not None:
                 if multiple_solutions:
                     assert isinstance(solution, list)
+                    result.solution.__dict__.update(
+                        {'time': int(intermediate_time.total_seconds() * 1000)})
                     solution.append(result.solution)
                 else:
                     solution = result.solution
@@ -1032,7 +1040,7 @@ class Instance(Model):
 
             if "_checker" in statistics:
                 tmp["_checker"] = statistics.pop("_checker")
-
+        
             assert self.output_type is not None
             solution = self.output_type(**tmp)
             statistics["time"] = timedelta(milliseconds=obj["time"])

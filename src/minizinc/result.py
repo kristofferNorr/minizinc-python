@@ -5,7 +5,7 @@
 from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum, auto
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, List
 
 from .model import Method
 
@@ -238,7 +238,10 @@ class Result:
         """
         if self.solution is not None:
             if isinstance(self.solution, list):
-                return getattr(self.solution[-1], "objective", None)
+                if len(self.solution) > 0:
+                    return getattr(self.solution[-1], "objective", None)
+                else:
+                    return None
             else:
                 return getattr(self.solution, "objective", None)
         else:
